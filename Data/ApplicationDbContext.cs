@@ -1,23 +1,33 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SelfHostedPasswordManager.Models;
+
 
 namespace SelfHostedPasswordManager.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {
+        public DbSet<Credential> Credentials { get; set; }
 
         private DbContextOptions<ApplicationDbContext> options;
 
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> _options)
-            : base(_options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> _options) : base(_options)
         {
             _options = options;
         }
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            base.OnModelCreating(builder);
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlite("Data Source=ManagerDatabase.db");
+            }
         }
 
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<Credential>().ToTable("Credentials");
+            base.OnModelCreating(builder);
+        }
     }
 }
